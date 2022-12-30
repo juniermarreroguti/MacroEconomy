@@ -1,0 +1,315 @@
+---
+title: "**LabPAD**: Macro-Economía"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows 
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+if(!require("pacman")){install.packages("pacman"); library("pacman")}
+
+lib <- c("devtools", "dplyr", "ggplot2", "tidyverse", "tidyr",
+          "flexdashboard", "xtable","forecast","reshape2","xts","scales","sidrar",
+          "mFilter","readxl", "BETS", "highcharter", "pracma", "tstools")
+
+p_load(char = lib)
+```
+
+
+
+Dashboard {.sidebar}
+===============================================================
+
+### Proposta
+
+<style>
+body {text-align: justify}
+</style>
+
+<br><br>
+
+&nbsp;&nbsp;
+Representamos uma aproximação, com dados obtidos de Insituto Brasileiro de Estatsitica e Geografica (**IBGE**), da produção de borracha nas capitais dos estados do Sudeste. Esta representação tem como objetivos: i) **mostrar a utilidade do manejo dos dados na toma de decisões**, e ii) **deixar aberta portas para explorar potencialidades**.
+
+
+<br><br>
+
+# Indicadores da produção de Borracha 
+
+## Row {data-height=500}
+
+### Pesquisa Industrial Mensal
+
+```{r PIM Pesquisa Industrial Mensal}
+
+# Pesquisa Industrial Mensal - Produção Física (PIM)
+# Tabela 3653 - Produção Física Industrial, por seções e atividades industriais
+
+# pim <- get_sidra(api='/t/3653/n1/all/n3/31,32,33,35/v/all/p/last%2035/c544/all/d/v3134%201,v3135%201,v3136%201,v3137%201,v3138%201,v3139%201,v3140%201,v3141%201,v4139%201')
+# 
+# #info_sidra(3653, wb = FALSE)
+# 
+# aux1 <- pim[c(which(pim$`Brasil e Unidade da Federação (Código)` == "31"),
+#                 which(pim$`Variável (Código)` == "3137"),
+#                 which(pim$`Seções e atividades industriais (CNAE 2.0) (Código)` == "129331")
+#                 ),]
+#   
+#   
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# MG <- data.frame(Estado= rep("Minas Gerais"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Fabricação de Borracha (Indice Anual)"))
+# 
+# 
+# aux1 <- pim[c(which(pim$`Brasil e Unidade da Federação (Código)` == "32"),
+#                 which(pim$`Variável (Código)` == "3137"),
+#                 which(pim$`Seções e atividades industriais (CNAE 2.0) (Código)` == "129331")
+#                 ),]
+# 
+# 
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# ES <- data.frame(Estado= rep("Espírito Santo"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Fabricação de Borracha (Indice Anual)"))
+# 
+# 
+# aux1 <- pim[c(which(pim$`Brasil e Unidade da Federação (Código)` == "33"),
+#                 which(pim$`Variável (Código)` == "3137"),
+#                 which(pim$`Seções e atividades industriais (CNAE 2.0) (Código)` == "129331")
+#                 ),]
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# RJ <- data.frame(Estado= rep("Rio de Janeiro"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Fabricação de Borracha (Indice Anual)"))
+# 
+# 
+# aux1 <- pim[c(which(pim$`Brasil e Unidade da Federação (Código)` == "35"),
+#                 which(pim$`Variável (Código)` == "3137"),
+#                 which(pim$`Seções e atividades industriais (CNAE 2.0) (Código)` == "129331")
+#                 ),]
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# SP <- data.frame(Estado= rep("São Paulo"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Fabricação de Borracha (Indice Anual)"))
+# 
+# aux1 <- union_all(RJ,ES)
+# aux2 <- union_all(MG,SP)
+# aux3.pim <- union_all(aux1,aux2)
+
+# dir.create("Data_MacroEconomy")
+# 
+# write.table(aux3.pim,
+#             "Data_MacroEconomy/aux3.pim.csv",
+#             sep = "\t",
+#             col.names = TRUE,
+#             row.names = FALSE)
+
+
+```
+
+
+
+```{r PIM}
+
+aux3.pim <- read.table("Data_MacroEconomy/aux3.pim.csv",
+                       header = TRUE,
+                       sep="\t")
+
+hchart(aux3.pim,  "line", hcaes(x=Datos, y= Serie, group = Estado)) %>%
+  hc_yAxis(title = list(text = "Índice acumulado no ano")) %>%
+  hc_xAxis(title = list(text = "Data")) %>%
+  hc_chart(zoomType = "x", borderWidth = 2, borderColor = "#F0FFFF") %>%
+  hc_tooltip(table = TRUE, split = T, crosshairs = T, backgroundColor = "#F0FFFF") %>%
+  hc_title(text = "Fabricação de Borracha (Indice Anual)", align = "center") %>%
+  hc_legend(verticalAlign = "top") %>%
+  hc_add_theme(hc_theme_google())
+
+```
+
+
+
+## Row{data-height=500}
+
+### Levantamento sistematico da produção Agricola
+
+
+```{r LSPA Levantamento sistematico da produção Agricola }
+
+# Levantamento sistematico da produção Agricola (6558) (LSPA)
+# Tabela 6588 - Série histórica da estimativa anual da área plantada, área colhida, produção e rendimento médio dos produtos das lavouras
+# Desde janeiro 2018-2020
+# lpsa <- get_sidra(api ='/t/6588/n1/all/n3/31,32,33,35/v/all/p/last%2035/c48/all')
+# #info_sidra(6588, wb = FALSE)
+# 
+# # Seleccionamos por codigo de Region (MG-31; ES-32,RJ-33; SP-35)
+# # A produção (35) em toneladas de açucar (39456)
+# aux1 <- lpsa[c(which(lpsa$`Brasil e Unidade da Federação (Código)` == "31"),
+#                 which(lpsa$`Variável (Código)` == "109"),
+#                 which(lpsa$`Produto das lavouras (Código)` == "39456")
+#                 ),]
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# MG <- data.frame(Estado= rep("Minas Gerais"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Cana-de-Açúcar"))
+# 
+# aux1 <- lpsa[c(which(lpsa$`Brasil e Unidade da Federação (Código)` == "32"),
+#                 which(lpsa$`Variável (Código)` == "109"),
+#                 which(lpsa$`Produto das lavouras (Código)` == "39456")
+#                 ),] 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# ES <- data.frame(Estado= rep("Espírito Santo"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Cana-de-Açúcar"))
+# 
+# 
+# aux1 <- lpsa[c(which(lpsa$`Brasil e Unidade da Federação (Código)` == "33"),
+#                 which(lpsa$`Variável (Código)` == "109"),
+#                 which(lpsa$`Produto das lavouras (Código)` == "39456")
+#                 ),] 
+#   
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# RJ <- data.frame(Estado= rep("Rio de Janeiro"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Cana-de-Açúcar"))
+# 
+# aux1 <-  lpsa[c(which(lpsa$`Brasil e Unidade da Federação (Código)` == "35"),
+#                 which(lpsa$`Variável (Código)` == "109"),
+#                 which(lpsa$`Produto das lavouras (Código)` == "39456")
+#                 ),]
+# 
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-30"), by = "month")
+# SP <- data.frame(Estado= rep("São Paulo"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Cana-de-Açúcar"))
+# 
+# aux1 <- union_all(RJ,ES)
+# aux2 <- union_all(MG,SP)
+# aux3.lpsa <- union_all(aux1,aux2)
+
+# write.table(aux3.lpsa,
+#             "Data_MacroEconomy/aux3.lpsa.csv",
+#             sep = "\t",
+#             col.names = TRUE,
+#             row.names = FALSE)
+
+
+
+```
+
+
+```{r LPSA}
+
+aux3.lpsa <- read.table("Data_MacroEconomy/aux3.pim.csv",
+                       header = TRUE,
+                       sep="\t")
+
+hchart(aux3.lpsa, "line", hcaes(x=Datos, y= Serie, group = Estado)) %>%
+  hc_yAxis(title = list(text = "Hectares")) %>%
+  hc_xAxis(title = list(text = "Data")) %>%
+  hc_chart(zoomType = "x", borderWidth = 2, borderColor = "#F0FFFF") %>%
+  hc_tooltip(table = TRUE, split = T, crosshairs = T, backgroundColor = "#F0FFFF") %>%
+  hc_title(text = "Área plantada com Cana-Açúcar", align = "center") %>%
+  hc_legend(verticalAlign = "top") %>%
+  hc_add_theme(hc_theme_google())
+
+```
+
+
+### Índice Nacional de Preços ao Consumidor Amplo
+
+
+```{r IPCA Índice Nacional de Preços ao Consumidor Amplo}
+# IPCA Índice Nacional de Preços ao Consumidor Amplo - IPCA
+# ipca <- get_sidra(api='/t/7060/n1/all/n7/3101,3301,3501,3201/v/69/p/all/c315/7169,7625,12411/d/v69%202')
+# 
+# #info_sidra(7060, wb = FALSE)
+# 
+# aux1 <- ipca[c(which(ipca$`Brasil e Região Metropolitana (Código)` == "3101"),
+#               which(ipca$`Geral, grupo, subgrupo, item e subitem (Código)`=="12411")),]
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-31"), by = "month")
+# MG <- data.frame(Estado= rep("Minas Gerais"), 
+#                  Datos= Anos,
+#                  Serie= ts, 
+#                  Lavoura= rep("Pneu"))
+# 
+# aux1 <- ipca[c(which(ipca$`Brasil e Região Metropolitana (Código)` == "3201"),
+#               which(ipca$`Geral, grupo, subgrupo, item e subitem (Código)`=="12411")),]
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-31"), by = "month")
+# ES <- data.frame(Estado= rep("Espírito Santo"), Datos= Anos,Serie= ts, Lavoura= rep("Pneu"))
+# 
+# aux1 <-  ipca[c(which(ipca$`Brasil e Região Metropolitana (Código)` == "3301"),
+#               which(ipca$`Geral, grupo, subgrupo, item e subitem (Código)`=="12411")),]
+# 
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-31"), by = "month")
+# RJ <- data.frame(Estado= rep("Rio de Janeiro"), Datos= Anos,Serie= ts, Lavoura= rep("Pneu"))
+# 
+# aux1 <- aux1 <- ipca[c(which(ipca$`Brasil e Região Metropolitana (Código)` == "3501"),
+#               which(ipca$`Geral, grupo, subgrupo, item e subitem (Código)`=="12411")),]
+#  
+# ts <- ts(aux1$Valor, start = c(2018,2), end = c(2020,12), frequency = 12) 
+# Anos <- seq(as.Date("2018-02-01"), as.Date("2020-12-31"), by = "month")
+# SP <- data.frame(Estado= rep("São Paulo"), Datos= Anos,Serie= ts, Lavoura= rep("Pneu"))
+# 
+# aux1 <- union_all(RJ,ES)
+# aux2 <- union_all(MG,SP)
+# aux3.ipca <- union_all(aux1,aux2)
+
+
+# write.table(aux3.ipca,
+#             "Data_MacroEconomy/aux3.ipca.csv",
+#             sep = "\t",
+#             col.names = TRUE,
+#             row.names = FALSE)
+
+
+```
+
+
+
+```{r IPCA}
+
+aux3.ipca <- read.table("Data_MacroEconomy/aux3.ipca.csv",
+                       header = TRUE,
+                       sep="\t")
+
+hchart(aux3.ipca,  "line", hcaes(x=Datos, y= Serie, group = Estado)) %>%
+  hc_yAxis(title = list(text = "Variação acumulado no ano")) %>%
+  hc_xAxis(title = list(text = "Data")) %>%
+  hc_chart(zoomType = "x", borderWidth = 2, borderColor = "#F0FFFF") %>%
+  hc_tooltip(table = TRUE, split = T, crosshairs = T, backgroundColor = "#F0FFFF") %>%
+  hc_title(text = "Índice de vendas de pneus", align = "center") %>%
+  hc_legend(verticalAlign = "top") %>%
+  hc_add_theme(hc_theme_google())
+
+
+```
+
+
+
